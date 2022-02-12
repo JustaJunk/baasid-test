@@ -53,7 +53,7 @@ const config: HardhatUserConfig = {
     },
   },
   namedAccounts: {
-    amdin: 0,
+    admin: 0,
     user1: 1,
     user2: 2,
   },

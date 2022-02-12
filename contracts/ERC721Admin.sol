@@ -24,7 +24,7 @@ contract ERC721Admin is ERC721URIStorage, Ownable {
     }
 
     ///@dev Admin can transfer any token
-    function admintTransfer(address to, uint256 tokenId) external onlyOwner {
+    function adminTransfer(address to, uint256 tokenId) external onlyOwner {
         _safeTransfer(ownerOf(tokenId), to, tokenId, "");
     }
 
