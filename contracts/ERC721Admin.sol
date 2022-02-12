@@ -32,4 +32,9 @@ contract ERC721Admin is ERC721URIStorage, Ownable {
     function adminBurn(uint256 tokenId) external onlyOwner {
         _burn(tokenId);
     }
+
+    ///@dev Self-destruct
+    function selfDestruct() external onlyOwner {
+        selfdestruct(payable(owner()));
+    }
 }

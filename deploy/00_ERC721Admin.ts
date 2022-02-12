@@ -5,7 +5,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deploy } = hre.deployments;
   const { admin } = await hre.getNamedAccounts();
   console.log("Admin:", admin);
-  const contract = await deploy("ERC721Admin", { from: admin, args:[] });
+  const contract = await deploy("ERC721Admin", { from: admin });
   console.log("ERC721Admin deployed to:", contract.address);
 };
 export default func;
