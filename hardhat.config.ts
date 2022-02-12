@@ -6,6 +6,7 @@ import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
+import "hardhat-deploy";
 
 dotenv.config();
 
@@ -23,13 +24,38 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 // Go to https://hardhat.org/config/ to learn more
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.4",
+  solidity: {
+    compilers: [
+      {
+        version: "0.8.4",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
+    ],
+  },
   networks: {
-    ropsten: {
-      url: process.env.ROPSTEN_URL || "",
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    hardhat: {
+      accounts: {
+        mnemonic: "test test test test test test test test test test test junk",
+      },
+      chainId: 1337,
     },
+    baasid: {
+      url: process.env.BAASID_URL || "",
+      accounts: {
+        mnemonic: "test test test test test test test test test test test junk",
+      },
+      chainId: 7414,
+    },
+  },
+  namedAccounts: {
+    amdin: 0,
+    user1: 1,
+    user2: 2,
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
