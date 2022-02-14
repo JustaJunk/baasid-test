@@ -37,23 +37,16 @@ async function main() {
   if (!contract) return;
 
   // Mint
-  const tokenIds = [...Array(10).keys()];
-  const baseURI = "ipfs://QmQu2oEk2ZmeDFcoaJsCPSnFGPkoDUPWEyVhT6VRZSuxbz/";
-  const startBlockNumber = await provider.getBlockNumber();
-  const startTime = Date.now();
-  await Promise.all(tokenIds.map(async (tid) => {
-    try {
-      const tx = await contract.mintTo(user1, tid, baseURI + tid, { gasLimit: 150000 });
-      const receipt = await tx.wait();
-      console.log(receipt.blockNumber);
-    } catch (err: any) {
-      console.error("[ERROR]", tid, err.message);
-    }
-  }));
-  const endBlockNumber = await provider.getBlockNumber();
-  const endTime = Date.now();
-  console.log("Block cost:", endBlockNumber - startBlockNumber);
-  console.log("Time cost:", (endTime - startTime)/1000, "sec");
+  console.log(await contract.balanceOf(user1));
+  console.log(await contract.tokenURI(0));
+  console.log(await contract.tokenURI(1));
+  console.log(await contract.tokenURI(2));
+  console.log(await contract.tokenURI(3));
+  try {
+    console.log(await contract.tokenURI(4));
+  } catch (err: any) {
+    console.log(err.error.message)
+  }
 }
 
 // We recommend this pattern to be able to use async/await everywhere
