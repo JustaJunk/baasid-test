@@ -22,12 +22,14 @@ source .env
 ```
 
 ## Pressure test
+Mint 100 tokens
 ```
 yarn runs scripts/pressure-mint.ts --network baasid
 yarn runs scripts/total-supply.ts --network baasid
 ```
 
 ## Reset contract
+Destruct the contract and deploy again
 ```
 yarn runs scripts/destruct.ts --network baasid
 yarn deploy --network baasid
