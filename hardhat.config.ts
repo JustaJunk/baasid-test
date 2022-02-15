@@ -41,21 +41,19 @@ const config: HardhatUserConfig = {
     hardhat: {
       accounts: {
         mnemonic: "test test test test test test test test test test test junk",
+        count: 1000,
       },
       chainId: 1337,
     },
     baasid: {
       url: process.env.BAASID_URL || "",
       accounts: {
+        // mnemonic: process.env.MNEMONI,
         mnemonic: "test test test test test test test test test test test junk",
+        count: 1000,
       },
       chainId: 7414,
     },
-  },
-  namedAccounts: {
-    admin: 0,
-    user1: 1,
-    user2: 2,
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,

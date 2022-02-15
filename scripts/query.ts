@@ -1,8 +1,3 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
 import { ethers, getNamedAccounts } from "hardhat";
 import { ERC721Admin, ERC721Admin__factory } from "../typechain";
 import LOCAL_CONFIG from "../deployments/localhost/ERC721Admin.json";
@@ -22,21 +17,14 @@ const getContract = (chainId: number, signer: SignerWithAddress) => {
 }
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
-
-  // We get the contract
   const { admin, user1, user2 } = await getNamedAccounts();
   const adminSigner = await ethers.getSigner(admin);
+  const signers = await ethers.getSigners();
   const network = await provider.getNetwork();
   const contract = getContract(network.chainId, adminSigner);
   if (!contract) return;
 
-  // Mint
+  // Get tokenURI
   console.log(await contract.balanceOf(user1));
   console.log(await contract.tokenURI(0));
   console.log(await contract.tokenURI(1));

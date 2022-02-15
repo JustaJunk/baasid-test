@@ -1,49 +1,52 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
-import { ethers, getNamedAccounts } from "hardhat";
+import { ethers, getNamedAccounts, getUnnamedAccounts } from "hardhat";
 import { ERC721Admin, ERC721Admin__factory } from "../typechain";
-import LOCAL_CONFIG from "../deployments/localhost/ERC721Admin.json";
-import BAASID_CONFIG from "../deployments/baasid/ERC721Admin.json";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { existsSync } from "fs";
 
 const { provider } = ethers;
+const LOCAL_DEPLOYMENT = "./deployments/localhost/ERC721Admin.json";
+const BAASID_DEPLOYMENT = "./deployments/baasid/ERC721Admin.json";
 
-const getContract = (chainId: number, signer: SignerWithAddress) => {
+const getContract = async (chainId: number, signer: SignerWithAddress) => {
   if (chainId === 1337) {
-    return ERC721Admin__factory.connect(LOCAL_CONFIG.address, signer);
+    if (existsSync(LOCAL_DEPLOYMENT)) {
+      const deployment = await import("."+LOCAL_DEPLOYMENT).then((module) => module.default);
+      console.log("contract address:", deployment.address);
+      return ERC721Admin__factory.connect(deployment.address, signer);
+    } else {
+      console.error("[ERROR] localhost deployment not exists");
+    }
   } else if (chainId === 7414) {
-    return ERC721Admin__factory.connect(BAASID_CONFIG.address, signer);
+    if (existsSync(BAASID_DEPLOYMENT)) {
+      const deployment = await import("."+BAASID_DEPLOYMENT).then((module) => module.default);
+      console.log("contract address:", deployment.address);
+      return ERC721Admin__factory.connect(deployment.address, signer);
+    } else {
+      console.error("[ERROR] baasid deployment not exists");
+    }
   } else {
     console.error("[ERROR] invalid network");
   }
 }
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
-
-  // We get the contract
-  const { admin, user1, user2 } = await getNamedAccounts();
-  const adminSigner = await ethers.getSigner(admin);
+  const signers = await ethers.getSigners();
+  const admins = signers.slice(0, 500);
+  const users = signers.slice(500, 1000);
+  console.log("admin count:", admins.length);
+  console.log("user count:", users.length);
   const network = await provider.getNetwork();
-  const contract = getContract(network.chainId, adminSigner);
+  const contract = await getContract(network.chainId, admins[0]);
   if (!contract) return;
-
+  
   // Mint
   const tokenIds = [...Array(10).keys()];
-  const baseURI = "ipfs://QmQu2oEk2ZmeDFcoaJsCPSnFGPkoDUPWEyVhT6VRZSuxbz/";
+  const baseURI = "ipfs://QmWRRiM8YvhCjQN4g9ooBqKXubAWuWD5NG9FuLHYnzoHPh/";
   const startBlockNumber = await provider.getBlockNumber();
   const startTime = Date.now();
   await Promise.all(tokenIds.map(async (tid) => {
     try {
-      const tx = await contract.mintTo(user1, tid, baseURI + tid, { gasLimit: 150000 });
+      const tx = await contract.connect(admins[tid]).mintTo(users[tid].address, tid, baseURI + tid);
       const receipt = await tx.wait();
       console.log(receipt.blockNumber);
     } catch (err: any) {
@@ -56,8 +59,6 @@ async function main() {
   console.log("Time cost:", (endTime - startTime)/1000, "sec");
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
