@@ -41,7 +41,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       accounts: {
         mnemonic: "test test test test test test test test test test test junk",
-        count: 1000,
+        count: 200,
       },
       chainId: 1337,
     },
@@ -50,7 +50,7 @@ const config: HardhatUserConfig = {
       accounts: {
         // mnemonic: process.env.MNEMONI,
         mnemonic: "test test test test test test test test test test test junk",
-        count: 1000,
+        count: 200,
       },
       chainId: 7414,
     },

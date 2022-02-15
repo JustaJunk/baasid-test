@@ -17,8 +17,8 @@ describe("ER721Admin", function () {
   let tx;
   const getTargets = async (): Promise<TestTarget> => {
     const signers = await ethers.getSigners();
-    const admins = signers.slice(0, 500);
-    const users = signers.slice(500, 1000);
+    const admins = signers.slice(0, 100);
+    const users = signers.slice(100, 200);
     await deployments.fixture(["ERC721Admin"]);
     const deployment = await deployments.get("ERC721Admin");
     return {

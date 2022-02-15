@@ -5,25 +5,28 @@ const { provider } = ethers;
 
 async function main() {
   const signers = await ethers.getSigners();
-  const admins = signers.slice(0, 500);
-  const users = signers.slice(500, 1000);
+  const admins = signers.slice(0, 100);
+  const users = signers.slice(100, 200);
   console.log("admin count:", admins.length);
   console.log("user count:", users.length);
   const contract = await getContract();
   if (!contract) return;
   
-  // Mint 500 tokens
-  const tokenIds = [...Array(500).keys()];
+  // Mint 100 tokens
+  const offsetIdx = [...Array(100).keys()];
+  const totalSupply = await contract.totalSupply();
+  console.log("current token supply:", totalSupply.toNumber());
   const baseURI = "ipfs://QmWRRiM8YvhCjQN4g9ooBqKXubAWuWD5NG9FuLHYnzoHPh/";
   const startBlockNumber = await provider.getBlockNumber();
   const startTime = Date.now();
-  await Promise.all(tokenIds.map(async (tid) => {
+  await Promise.all(offsetIdx.map(async (idx) => {
     try {
-      const tx = await contract.connect(admins[tid]).mintTo(users[0].address, tid, baseURI + tid);
+      const tokenId = totalSupply.add(idx);
+      const tx = await contract.connect(admins[idx]).mintTo(users[0].address, tokenId, baseURI + tokenId.toString());
       const receipt = await tx.wait();
       console.log(receipt.blockNumber);
     } catch (err: any) {
-      console.error("[ERROR]", tid, err.message);
+      console.error("[ERROR]", idx, err.message);
     }
   }));
   const endBlockNumber = await provider.getBlockNumber();

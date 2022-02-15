@@ -12,9 +12,13 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 contract ERC721Admin is ERC721URIStorage, AccessControl {
     bytes32 public constant ADMIN = "admin";
 
+    /// @dev deployer as default admin
     address public immutable defaultAdmin;
 
-    ///@dev Setup ERC721
+    /// @dev total supply
+    uint256 public totalSupply;
+
+    /// @dev Setup ERC721 and AccessControl
     constructor(address[] memory admins) ERC721("BaaSidTest", "BAST") {
         uint256 size = admins.length;
         require(size > 0, "empty admins");
@@ -24,9 +28,10 @@ contract ERC721Admin is ERC721URIStorage, AccessControl {
         for (uint256 i = 0; i < size; i++) {
             _setupRole(ADMIN, admins[i]);
         }
+        totalSupply = 0;
     }
 
-    ///@dev Admin mint to
+    /// @dev Admin mint
     function mintTo(
         address to,
         uint256 tokenId,
@@ -34,9 +39,10 @@ contract ERC721Admin is ERC721URIStorage, AccessControl {
     ) external onlyRole(ADMIN) {
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, tokenURI);
+        totalSupply++;
     }
 
-    ///@dev Admin can transfer any token
+    /// @dev Admin can transfer any token
     function adminTransfer(address to, uint256 tokenId)
         external
         onlyRole(ADMIN)
@@ -44,12 +50,13 @@ contract ERC721Admin is ERC721URIStorage, AccessControl {
         _safeTransfer(ownerOf(tokenId), to, tokenId, "");
     }
 
-    ///@dev Admin can burn any token
+    /// @dev Admin can burn any token
     function adminBurn(uint256 tokenId) external onlyRole(ADMIN) {
         _burn(tokenId);
+        totalSupply--;
     }
 
-    ///@dev Self-destruct
+    /// @dev Self-destruct
     function selfDestruct() external onlyRole(DEFAULT_ADMIN_ROLE) {
         selfdestruct(payable(defaultAdmin));
     }

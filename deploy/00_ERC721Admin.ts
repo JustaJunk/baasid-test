@@ -5,15 +5,11 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  if (!process.env.MNEMONIC) {
-      console.error("[ERROR] mnemonic not set");
-      return;
-  }
   const { deploy } = hre.deployments;
   const admins = await hre.getUnnamedAccounts();
   console.log("Deployer:", admins[0]);
   const contract = await deploy("ERC721Admin", {
-    args: [admins.slice(0, 500)],
+    args: [admins.slice(0, 100)],
     from: admins[0],
   });
   console.log("ERC721Admin deployed to:", contract.address);
