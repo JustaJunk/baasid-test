@@ -49,6 +49,6 @@
     "typechain": "hardhat typechain",
     "verify": "hardhat etherscan-verfiy",
     "coverage": "hardhat coverage",
-    "localnet": "hardhat node"
+    "localhost": "hardhat node"
   }
 }
