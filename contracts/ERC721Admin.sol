@@ -12,10 +12,13 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 contract ERC721Admin is ERC721URIStorage, AccessControl {
     bytes32 public constant ADMIN = "admin";
 
+    address public immutable defaultAdmin;
+
     ///@dev Setup ERC721
     constructor(address[] memory admins) ERC721("BaaSidTest", "BAST") {
         uint256 size = admins.length;
         require(size > 0, "empty admins");
+        defaultAdmin = _msgSender();
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setRoleAdmin(ADMIN, DEFAULT_ADMIN_ROLE);
         for (uint256 i = 0; i < size; i++) {
@@ -47,15 +50,8 @@ contract ERC721Admin is ERC721URIStorage, AccessControl {
     }
 
     ///@dev Self-destruct
-    function selfDestruct(address payable defaultAdmin)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        require(
-            hasRole(DEFAULT_ADMIN_ROLE, defaultAdmin),
-            "only default admin"
-        );
-        selfdestruct(defaultAdmin);
+    function selfDestruct() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        selfdestruct(payable(defaultAdmin));
     }
 
     /// @dev Override interface

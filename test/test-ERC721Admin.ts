@@ -69,4 +69,12 @@ describe("ER721Admin", function () {
     await expect(contract.ownerOf(0))
     .to.be.revertedWith("ERC721: owner query for nonexistent token" );
   });
+
+  it("Admin destruct", async function () {
+    const { contract, admins } = await getTargets();
+    tx = await contract.connect(admins[0]).selfDestruct();
+    await tx.wait();
+    await expect(contract.balanceOf(admins[1].address))
+    .to.be.revertedWith("");
+  });
 });

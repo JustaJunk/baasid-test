@@ -9,11 +9,10 @@ async function main() {
   const users = signers.slice(500, 1000);
   console.log("admin count:", admins.length);
   console.log("user count:", users.length);
-  const network = await provider.getNetwork();
-  const contract = await getContract(network.chainId, admins[0]);
+  const contract = await getContract();
   if (!contract) return;
   
-  // Mint
+  // Mint 500 tokens
   const tokenIds = [...Array(500).keys()];
   const baseURI = "ipfs://QmWRRiM8YvhCjQN4g9ooBqKXubAWuWD5NG9FuLHYnzoHPh/";
   const startBlockNumber = await provider.getBlockNumber();
