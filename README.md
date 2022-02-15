@@ -24,7 +24,7 @@ source .env
 ## Pressure test
 ```
 yarn runs scripts/pressure-mint.ts --network baasid
-yarn runs scripts/query.ts --network baasid
+yarn runs scripts/total-supply.ts --network baasid
 ```
 
 ## Reset contract

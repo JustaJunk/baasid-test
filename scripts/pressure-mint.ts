@@ -15,7 +15,7 @@ async function main() {
   // Mint 100 tokens
   const offsetIdx = [...Array(100).keys()];
   const totalSupply = await contract.totalSupply();
-  console.log("current token supply:", totalSupply.toNumber());
+  console.log("current token supply:", totalSupply.toNumber(), "tokens");
   const baseURI = "ipfs://QmWRRiM8YvhCjQN4g9ooBqKXubAWuWD5NG9FuLHYnzoHPh/";
   const startBlockNumber = await provider.getBlockNumber();
   const startTime = Date.now();
@@ -31,9 +31,9 @@ async function main() {
   }));
   const endBlockNumber = await provider.getBlockNumber();
   const endTime = Date.now();
+  console.log("current total supply:", (await contract.totalSupply()).toNumber(), "tokens\n");
   console.log("Block cost:", endBlockNumber - startBlockNumber);
   console.log("Time cost:", (endTime - startTime)/1000, "sec");
-  console.log(users[0].address, "balance:", (await contract.balanceOf(users[0].address)).toNumber());
 }
 
 main().catch((error) => {

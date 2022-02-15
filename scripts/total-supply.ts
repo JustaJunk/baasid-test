@@ -7,7 +7,7 @@ async function main() {
   if (!contract) return;
 
   // Destruct
-  console.log(user0.address, "has", (await contract.balanceOf(user0.address)).toNumber(), "tokens");
+  console.log("total supply:", (await contract.totalSupply()).toNumber(), "tokens");
 }
 
 main().catch((error) => {
