@@ -8,21 +8,22 @@ async function main() {
   const signers = await ethers.getSigners();
   const admins = signers.slice(0, MAX_ADMIN_COUNT);
   const users = signers.slice(MAX_ADMIN_COUNT, MAX_SIGNER_COUNT);
+  console.log("admin count:", admins.length);
+  console.log("user count:", users.length);
   const contract = await getContract();
   if (!contract) return;
   
-  // Mint tokens
+  // Burn all tokens
   const offsetIdx = [...Array(MAX_ADMIN_COUNT).keys()];
   const totalSupply = await contract.totalSupply();
   console.log("current token supply:", totalSupply.toNumber(), "tokens");
-  const baseURI = "ipfs://QmWRRiM8YvhCjQN4g9ooBqKXubAWuWD5NG9FuLHYnzoHPh/";
   const startBlockNumber = await provider.getBlockNumber();
   const startTime = Date.now();
   let previousBlockNumber = 0;
   await Promise.all(offsetIdx.map(async (idx) => {
     try {
-      const tokenId = totalSupply.add(idx);
-      const tx = await contract.connect(admins[idx]).mintTo(users[0].address, tokenId, baseURI + tokenId.toString());
+      const tokenId = totalSupply.sub(idx).sub(1);
+      const tx = await contract.connect(admins[idx]).adminBurn(tokenId);
       const receipt = await tx.wait();
       if (receipt.blockNumber > previousBlockNumber) {
         console.log("\nBlockNumber:", receipt.blockNumber);

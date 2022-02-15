@@ -8,6 +8,8 @@ import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "hardhat-deploy";
 
+import { MAX_SIGNER_COUNT } from "./misc/constants";
+
 dotenv.config();
 
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -15,14 +17,13 @@ dotenv.config();
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   const accounts = await hre.ethers.getSigners();
 
-  for (const account of accounts) {
+  for (const account of accounts.slice(0, 20)) {
     console.log(account.address);
   }
 });
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
-
 const config: HardhatUserConfig = {
   solidity: {
     compilers: [
@@ -41,16 +42,16 @@ const config: HardhatUserConfig = {
     hardhat: {
       accounts: {
         mnemonic: "test test test test test test test test test test test junk",
-        count: 200,
+        count: MAX_SIGNER_COUNT,
       },
       chainId: 1337,
     },
     baasid: {
-      url: process.env.BAASID_URL || "",
+      url: "http://192.168.2.181:8545",
       accounts: {
         // mnemonic: process.env.MNEMONI,
         mnemonic: "test test test test test test test test test test test junk",
-        count: 200,
+        count: MAX_SIGNER_COUNT,
       },
       chainId: 7414,
     },

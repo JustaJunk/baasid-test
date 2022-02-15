@@ -61,6 +61,17 @@ contract ERC721Admin is ERC721URIStorage, AccessControl {
         selfdestruct(payable(defaultAdmin));
     }
 
+    /// @dev Add admin roles
+    function addAdmins(address[] calldata newAdmins)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        uint256 size = newAdmins.length;
+        for (uint256 i = 0; i < size; i++) {
+            grantRole(ADMIN, newAdmins[i]);
+        }
+    }
+
     /// @dev Override interface
     function supportsInterface(bytes4 interfaceId)
         public
