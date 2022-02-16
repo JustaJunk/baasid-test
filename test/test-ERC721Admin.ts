@@ -2,6 +2,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect, assert } from "chai";
 import { ethers, deployments } from "hardhat";
 import { ERC721Admin, ERC721Admin__factory } from "../typechain";
+import { MAX_ADMIN_COUNT, MAX_SIGNER_COUNT } from "../misc/constants";
 
 const tokenURI = "ipfs://QmQu2oEk2ZmeDFcoaJsCPSnFGPkoDUPWEyVhT6VRZSuxbz/0"
 
@@ -17,8 +18,8 @@ describe("ER721Admin", function () {
   let tx;
   const getTargets = async (): Promise<TestTarget> => {
     const signers = await ethers.getSigners();
-    const admins = signers.slice(0, 100);
-    const users = signers.slice(100, 200);
+    const admins = signers.slice(0, MAX_ADMIN_COUNT);
+    const users = signers.slice(MAX_ADMIN_COUNT, MAX_SIGNER_COUNT);
     await deployments.fixture(["ERC721Admin"]);
     const deployment = await deployments.get("ERC721Admin");
     return {
