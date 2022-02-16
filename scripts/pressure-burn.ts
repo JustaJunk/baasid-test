@@ -30,6 +30,7 @@ async function main() {
         console.log("BlockHash:", receipt.blockHash);
         previousBlockNumber = receipt.blockNumber;
       }
+      console.log("TxHash:", receipt.transactionHash); // print tx hash
     } catch (err: any) {
       console.error("[ERROR]", idx, err.message);
     }
