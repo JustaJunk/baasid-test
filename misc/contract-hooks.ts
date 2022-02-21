@@ -5,7 +5,7 @@ const { provider } = ethers;
 
 type ArtifactMap = { [chainId: number]: string };
 
-const artifactMap: ArtifactMap = {
+export const artifactMap: ArtifactMap = {
   1337: "./deployments/localhost/",
   7414: "./deployments/baasid/",
 }

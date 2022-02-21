@@ -11,14 +11,26 @@ yarn deploy
 yarn test
 ```
 
-## Pressure test
-Mint and burn tokens
+## ERC721 single pressure test
+Single mint and burn tokens
 ```
-yarn runs scripts/pressure-mint.ts --network baasid
-yarn runs scripts/pressure-burn.ts --network baasid
+yarn runs scripts/erc721/single-mint.ts --network baasid
+yarn runs scripts/erc721/single-burn.ts --network baasid
 ```
 
-## Reset contract
+## ERC721 batch pressure test
+Batch mint and burn tokens
+```
+yarn runs scripts/erc721/batch-mint.ts --network baasid
+yarn runs scripts/erc721/batch-burn.ts --network baasid
+```
+
+## ERC20 transfer test
+```
+yarn runs scripts/erc20/transfer.ts --network baasid
+```
+
+## Reset all contracts
 Destruct the contract and deploy again
 ```
 yarn runs scripts/destruct.ts --network baasid

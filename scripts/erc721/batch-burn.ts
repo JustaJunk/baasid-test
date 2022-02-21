@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 import { getERC721Admin } from "../../misc/contract-hooks";
-import { MAX_ADMIN_COUNT, BATCH_SIZE } from "../../misc/constants";
+import { BATCH_ADMIN_COUNT, BATCH_SIZE } from "../../misc/constants";
 
 const { provider } = ethers;
 
@@ -12,12 +12,12 @@ async function main() {
   
   // Get admins
   const signers = await ethers.getSigners();
-  const admins = signers.slice(0, MAX_ADMIN_COUNT);
+  const admins = signers.slice(0, BATCH_ADMIN_COUNT);
   console.log("admin count:", admins.length);
   
   // Burn tokens
-  const offsetIdx = [...Array(BATCH_SIZE * MAX_ADMIN_COUNT).keys()];
-  const offsetIdxSlices = [...Array(MAX_ADMIN_COUNT).keys()].map((adminId) => offsetIdx.slice(BATCH_SIZE*adminId, BATCH_SIZE*(adminId+1)));
+  const offsetIdx = [...Array(BATCH_SIZE * BATCH_ADMIN_COUNT).keys()];
+  const offsetIdxSlices = [...Array(BATCH_ADMIN_COUNT).keys()].map((adminId) => offsetIdx.slice(BATCH_SIZE*adminId, BATCH_SIZE*(adminId+1)));
   const totalSupply = await contract.totalSupply();
   console.log("current token supply:", totalSupply.toNumber(), "tokens");
   const startBlockNumber = await provider.getBlockNumber();
@@ -33,7 +33,7 @@ async function main() {
         console.log("BlockHash:", receipt.blockHash);
         previousBlockNumber = receipt.blockNumber;
       }
-      console.log("TxHash:", receipt.transactionHash); // print tx hash
+      // console.log("TxHash:", receipt.transactionHash); // print tx hash
     } catch (err: any) {
       console.error("[ERROR]", adminId, err.message);
     }
