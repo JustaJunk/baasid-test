@@ -1,8 +1,8 @@
-import { getContract } from "../misc/contract-hooks";
+import { getERC721Admin } from "../../misc/contract-hooks";
 import fs from "fs";
 
 async function main() {
-  const contract = await getContract();
+  const contract = await getERC721Admin();
   if (!contract) return;
 
   // Destruct

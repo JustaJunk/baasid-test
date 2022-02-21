@@ -33,9 +33,9 @@ describe("ER721Admin", function () {
     const { contract, admins, users } = await getTargets();
     const tokenId = 0;
     const idx = 0;
-    await expect(contract.connect(users[idx]).mintTo(users[idx].address, tokenId, tokenURI))
+    await expect(contract.connect(users[idx]).adminMint(users[idx].address, tokenId, tokenURI))
     .to.be.revertedWith(`AccessControl: account ${users[idx].address.toLowerCase()} is missing role ${ADMIN_CODE}`);
-    tx = await contract.connect(admins[idx]).mintTo(users[idx].address, tokenId, tokenURI);
+    tx = await contract.connect(admins[idx]).adminMint(users[idx].address, tokenId, tokenURI);
     await tx.wait();
     assert( (await contract.balanceOf(users[idx].address)).eq(1), "balance error" );
     assert( (await contract.ownerOf(tokenId)) === users[idx].address, "owner error" );
@@ -45,7 +45,7 @@ describe("ER721Admin", function () {
     const { contract, admins, users } = await getTargets();
     const tokenId = 0;
     const idx = 1;
-    tx = await contract.connect(admins[idx]).mintTo(users[idx].address, tokenId, tokenURI);
+    tx = await contract.connect(admins[idx]).adminMint(users[idx].address, tokenId, tokenURI);
     await tx.wait();
     await expect(contract.connect(users[idx]).adminTransfer(users[idx].address, tokenId))
     .to.be.revertedWith(`AccessControl: account ${users[idx].address.toLowerCase()} is missing role ${ADMIN_CODE}`);
@@ -60,7 +60,7 @@ describe("ER721Admin", function () {
     const { contract, admins, users } = await getTargets();
     const tokenId = 0;
     const idx = 2;
-    tx = await contract.connect(admins[idx]).mintTo(users[idx].address, tokenId, tokenURI);
+    tx = await contract.connect(admins[idx]).adminMint(users[idx].address, tokenId, tokenURI);
     await tx.wait();
     await expect(contract.connect(users[idx]).adminBurn(tokenId))
     .to.be.revertedWith(`AccessControl: account ${users[idx].address.toLowerCase()} is missing role ${ADMIN_CODE}`);

@@ -1,9 +1,9 @@
-import { ethers } from "hardhat";
-import { getContract } from "../misc/contract-hooks";
+import { getERC721Admin } from "../../misc/contract-hooks";
 
 async function main() {
-  const contract = await getContract();
-  const user0 = (await ethers.getSigners())[100];
+
+  // Get ERC721Admin contract
+  const contract = await getERC721Admin();
   if (!contract) return;
 
   // Destruct

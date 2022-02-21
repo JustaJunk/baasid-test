@@ -32,7 +32,7 @@ contract ERC721Admin is ERC721URIStorage, AccessControl {
     }
 
     /// @dev Admin mint
-    function mintTo(
+    function adminMint(
         address to,
         uint256 tokenId,
         string calldata tokenURI
@@ -54,6 +54,45 @@ contract ERC721Admin is ERC721URIStorage, AccessControl {
     function adminBurn(uint256 tokenId) external onlyRole(ADMIN) {
         _burn(tokenId);
         totalSupply--;
+    }
+
+    /// @dev Admin batch mint
+    function adminBatchMint(
+        address[] calldata receivers,
+        uint256[] calldata tokenIds,
+        string[] calldata tokenURIs
+    ) external {
+        uint256 size = receivers.length;
+        require(
+            size == tokenIds.length && size == tokenURIs.length,
+            "size not match"
+        );
+        for (uint256 i = 0; i < size; i++) {
+            _safeMint(receivers[i], tokenIds[i]);
+            _setTokenURI(tokenIds[i], tokenURIs[i]);
+        }
+        totalSupply += size;
+    }
+
+    /// @dev Admin batch transfer
+    function adminBatchTransfer(
+        address[] calldata receivers,
+        uint256[] calldata tokenIds
+    ) external {
+        uint256 size = receivers.length;
+        require(size == tokenIds.length, "size not match");
+        for (uint256 i = 0; i < size; i++) {
+            _safeTransfer(ownerOf(tokenIds[i]), receivers[i], tokenIds[i], "");
+        }
+    }
+
+    /// @dev Admin batch burn
+    function adminBatchBurn(uint256[] calldata tokenIds) external {
+        uint256 size = tokenIds.length;
+        for (uint256 i = 0; i < size; i++) {
+            _burn(tokenIds[i]);
+        }
+        totalSupply -= size;
     }
 
     /// @dev Self-destruct

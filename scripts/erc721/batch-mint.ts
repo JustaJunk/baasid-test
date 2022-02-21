@@ -1,29 +1,41 @@
 import { ethers } from "hardhat";
-import { getContract } from "../misc/contract-hooks";
-import { MAX_ADMIN_COUNT, MAX_SIGNER_COUNT } from "../misc/constants";
+import { getERC721Admin } from "../../misc/contract-hooks";
+import { MAX_ADMIN_COUNT, BATCH_SIZE } from "../../misc/constants";
 
 const { provider } = ethers;
 
 async function main() {
+
+  // Get ERC721Admin contract
+  const contract = await getERC721Admin();
+  if (!contract) return;
+
+  // Get admins and users
   const signers = await ethers.getSigners();
   const admins = signers.slice(0, MAX_ADMIN_COUNT);
-  const users = signers.slice(MAX_ADMIN_COUNT, MAX_SIGNER_COUNT);
+  const users = signers.slice(0, BATCH_SIZE * MAX_ADMIN_COUNT);
   console.log("admin count:", admins.length);
   console.log("user count:", users.length);
-  const contract = await getContract();
-  if (!contract) return;
   
-  // Burn all tokens
-  const offsetIdx = [...Array(MAX_ADMIN_COUNT).keys()];
+  // Mint tokens
+  const offsetIdx = [...Array(BATCH_SIZE * MAX_ADMIN_COUNT).keys()];
+  const offsetIdxSlices = [...Array(MAX_ADMIN_COUNT).keys()].map((adminId) => offsetIdx.slice(BATCH_SIZE*adminId, BATCH_SIZE*(adminId+1)));
   const totalSupply = await contract.totalSupply();
   console.log("current token supply:", totalSupply.toNumber(), "tokens");
+  const baseURI = "ipfs://QmWRRiM8YvhCjQN4g9ooBqKXubAWuWD5NG9FuLHYnzoHPh/";
   const startBlockNumber = await provider.getBlockNumber();
   const startTime = Date.now();
-  let previousBlockNumber = 0;
-  await Promise.all(offsetIdx.map(async (idx) => {
+  let previousBlockNumber = -1;
+  await Promise.all(offsetIdxSlices.map(async (slice, adminId) => {
     try {
-      const tokenId = totalSupply.sub(idx).sub(1);
-      const tx = await contract.connect(admins[idx]).adminBurn(tokenId);
+      // console.log(slice);
+      const receivers = users.slice(BATCH_SIZE*adminId, BATCH_SIZE*(adminId+1)).map((user) => user.address);
+      const tokenIds = slice.map((offset) => totalSupply.add(offset));
+      const tokenURIs = tokenIds.map((tokenId) => baseURI + tokenId);
+      // console.log(receivers.length);
+      // console.log(tokenIds.length);
+      // console.log(tokenURIs.length);
+      const tx = await contract.connect(admins[adminId]).adminBatchMint(receivers, tokenIds, tokenURIs);
       const receipt = await tx.wait();
       if (receipt.blockNumber > previousBlockNumber) {
         console.log("\nBlockNumber:", receipt.blockNumber);
@@ -32,7 +44,7 @@ async function main() {
       }
       console.log("TxHash:", receipt.transactionHash); // print tx hash
     } catch (err: any) {
-      console.error("[ERROR]", idx, err.message);
+      console.error("[ERROR]", adminId, err.message);
     }
   }));
   const endBlockNumber = await provider.getBlockNumber();
