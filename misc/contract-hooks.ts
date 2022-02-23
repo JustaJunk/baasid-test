@@ -1,13 +1,12 @@
 import { ERC721Admin__factory, ERC20Mojo__factory } from "../typechain";
-import { existsSync } from "fs";
 import { ethers } from "hardhat";
 const { provider } = ethers;
 
 type ArtifactMap = { [chainId: number]: string };
 
 export const artifactMap: ArtifactMap = {
-  1337: "./deployments/localhost/",
-  7414: "./deployments/baasid/",
+  1337: "../deployments/localhost/",
+  7414: "../deployments/baasid/",
 }
 
 export const getERC721Admin = async () => {
@@ -20,8 +19,8 @@ export const getERC721Admin = async () => {
     return
   }
   const artifactJson = prefix + 'ERC721Admin.json';
-  if (existsSync(artifactJson)) {
-    const deployment = await import("." + artifactJson).then((module) => module.default);
+  const deployment = require(artifactJson);
+  if (deployment) {
     console.log("contract address:", deployment.address);
     return ERC721Admin__factory.connect(deployment.address, signer);
   } else {
@@ -39,8 +38,8 @@ export const getERC20Mojo = async () => {
     return
   }
   const artifactJson = prefix + 'ERC20Mojo.json';
-  if (existsSync(artifactJson)) {
-    const deployment = await import("." + artifactJson).then((module) => module.default);
+  const deployment = require(artifactJson);
+  if (deployment) {
     console.log("contract address:", deployment.address);
     return ERC20Mojo__factory.connect(deployment.address, signer);
   } else {
