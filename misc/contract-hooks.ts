@@ -7,6 +7,7 @@ type ArtifactMap = { [chainId: number]: string };
 export const artifactMap: ArtifactMap = {
   1337: "../deployments/localhost/",
   7414: "../deployments/baasid/",
+  928558113: "../deployments/baasid_120/",
 }
 
 export const getERC721Admin = async () => {

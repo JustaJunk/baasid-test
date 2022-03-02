@@ -55,6 +55,15 @@ const config: HardhatUserConfig = {
       },
       chainId: 7414,
     },
+    baasid_120: {
+      url: "http://192.168.2.120:8545",
+      accounts: {
+        // mnemonic: process.env.MNEMONI,
+        mnemonic: "test test test test test test test test test test test junk",
+        count: MAX_SIGNER_COUNT,
+      },
+      chainId: 928558113,
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,

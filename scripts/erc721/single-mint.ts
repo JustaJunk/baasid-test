@@ -28,7 +28,7 @@ async function main() {
   await Promise.all(offsetIdx.map(async (idx) => {
     try {
       const tokenId = totalSupply.add(idx);
-      const tx = await contract.connect(admins[idx]).adminMint(users[0].address, tokenId, baseURI + tokenId.toString());
+      const tx = await contract.connect(admins[idx]).adminMint(users[0].address, tokenId, baseURI + tokenId.toString(), { gasPrice: 0 });
       const receipt = await tx.wait();
       if (receipt.blockNumber > previousBlockNumber) {
         console.log("\nBlockNumber:", receipt.blockNumber);

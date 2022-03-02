@@ -10,6 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const contract = await deploy("ERC20Mojo", {
     args: [ethers.utils.parseEther("1000000"), users.slice(0, MAX_ADMIN_COUNT)],
     from: deployer,
+    gasPrice: '0x0',
   });
   console.log("ERC20Mojo deployed to:", contract.address);
 };

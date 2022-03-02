@@ -9,6 +9,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const contract = await deploy("ERC721Admin", {
     args: [admins.slice(0, MAX_ADMIN_COUNT)],
     from: admins[0],
+    gasPrice: '0x0',
   });
   console.log("ERC721Admin deployed to:", contract.address);
 };

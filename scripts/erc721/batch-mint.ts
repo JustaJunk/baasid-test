@@ -31,7 +31,7 @@ async function main() {
       const receivers = users.slice(BATCH_SIZE*adminId, BATCH_SIZE*(adminId+1)).map((user) => user.address);
       const tokenIds = slice.map((offset) => totalSupply.add(offset));
       const tokenURIs = tokenIds.map((tokenId) => baseURI + tokenId);
-      const tx = await contract.connect(admins[adminId]).adminBatchMint(receivers, tokenIds, tokenURIs);
+      const tx = await contract.connect(admins[adminId]).adminBatchMint(receivers, tokenIds, tokenURIs, { gasPrice: 0 });
       const receipt = await tx.wait();
       if (receipt.blockNumber > previousBlockNumber) {
         console.log("\nBlockNumber:", receipt.blockNumber);
