@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 /**
@@ -9,37 +9,35 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
  @notice For BaaSid test
  @author Justa Liang
  */
-contract ERC721Admin is ERC721URIStorage, AccessControl {
-    bytes32 public constant ADMIN = "admin";
+contract ERC721Admin is ERC721Enumerable, AccessControl {
+    using Strings for uint256;
+
+    /// @dev Admin role code
+    bytes32 public constant ADMIN = keccak256("ADMIN_ROLE");
 
     /// @dev deployer as default admin
     address public immutable defaultAdmin;
 
-    /// @dev total supply
-    uint256 public totalSupply;
+    /// @dev base URI
+    string private __baseURI;
 
     /// @dev Setup ERC721 and AccessControl
-    constructor(address[] memory admins) ERC721("BaaSidTest", "BAST") {
+    constructor(address[] memory admins, string memory initBaseURI)
+        ERC721("BaaSidTest", "BAST")
+    {
         uint256 size = admins.length;
         require(size > 0, "empty admins");
         defaultAdmin = _msgSender();
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        _setRoleAdmin(ADMIN, DEFAULT_ADMIN_ROLE);
         for (uint256 i = 0; i < size; i++) {
             _setupRole(ADMIN, admins[i]);
         }
-        totalSupply = 0;
+        __baseURI = initBaseURI;
     }
 
     /// @dev Admin mint
-    function adminMint(
-        address to,
-        uint256 tokenId,
-        string calldata tokenURI
-    ) external onlyRole(ADMIN) {
+    function adminMint(address to, uint256 tokenId) external onlyRole(ADMIN) {
         _safeMint(to, tokenId);
-        _setTokenURI(tokenId, tokenURI);
-        totalSupply++;
     }
 
     /// @dev Admin can transfer any token
@@ -53,7 +51,6 @@ contract ERC721Admin is ERC721URIStorage, AccessControl {
     /// @dev Admin can burn any token
     function adminBurn(uint256 tokenId) external onlyRole(ADMIN) {
         _burn(tokenId);
-        totalSupply--;
     }
 
     /// @dev Admin batch mint
@@ -69,9 +66,7 @@ contract ERC721Admin is ERC721URIStorage, AccessControl {
         );
         for (uint256 i = 0; i < size; i++) {
             _safeMint(receivers[i], tokenIds[i]);
-            _setTokenURI(tokenIds[i], tokenURIs[i]);
         }
-        totalSupply += size;
     }
 
     /// @dev Admin batch transfer
@@ -92,7 +87,6 @@ contract ERC721Admin is ERC721URIStorage, AccessControl {
         for (uint256 i = 0; i < size; i++) {
             _burn(tokenIds[i]);
         }
-        totalSupply -= size;
     }
 
     /// @dev Self-destruct
@@ -111,17 +105,35 @@ contract ERC721Admin is ERC721URIStorage, AccessControl {
         }
     }
 
+    /// @dev Update baseURI
+    function updateBaseURI(string calldata newBaseURI)
+        external
+        onlyRole(ADMIN)
+    {
+        __baseURI = newBaseURI;
+    }
+
     /// @dev Override interface
     function supportsInterface(bytes4 interfaceId)
         public
         view
         virtual
-        override(ERC721, AccessControl)
+        override(ERC721Enumerable, AccessControl)
         returns (bool)
     {
-        return
-            interfaceId == type(IERC721).interfaceId ||
-            interfaceId == type(IAccessControl).interfaceId ||
-            super.supportsInterface(interfaceId);
+        return super.supportsInterface(interfaceId);
+    }
+
+    /// @dev Override ERC721.tokenURI
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        virtual
+        override
+        returns (string memory)
+    {
+        require(_exists(tokenId), "query for nonexistent token");
+
+        return string(abi.encodePacked(__baseURI, tokenId.toString(), ".json"));
     }
 }

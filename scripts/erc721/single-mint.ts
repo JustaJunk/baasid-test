@@ -21,14 +21,13 @@ async function main() {
   const offsetIdx = [...Array(MAX_ADMIN_COUNT).keys()];
   const totalSupply = await contract.totalSupply();
   console.log("current token supply:", totalSupply.toNumber(), "tokens");
-  const baseURI = "ipfs://QmWRRiM8YvhCjQN4g9ooBqKXubAWuWD5NG9FuLHYnzoHPh/";
   const startBlockNumber = await provider.getBlockNumber();
   const startTime = Date.now();
   let previousBlockNumber = 0;
   await Promise.all(offsetIdx.map(async (idx) => {
     try {
       const tokenId = totalSupply.add(idx);
-      const tx = await contract.connect(admins[idx]).adminMint(users[0].address, tokenId, baseURI + tokenId.toString(), { gasPrice: 0 });
+      const tx = await contract.connect(admins[idx]).adminMint(users[0].address, tokenId, { gasPrice: 0 });
       const receipt = await tx.wait();
       if (receipt.blockNumber > previousBlockNumber) {
         console.log("\nBlockNumber:", receipt.blockNumber);

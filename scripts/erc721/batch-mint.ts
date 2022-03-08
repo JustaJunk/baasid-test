@@ -22,7 +22,6 @@ async function main() {
   const offsetIdxSlices = [...Array(BATCH_ADMIN_COUNT).keys()].map((adminId) => offsetIdx.slice(BATCH_SIZE*adminId, BATCH_SIZE*(adminId+1)));
   const totalSupply = await contract.totalSupply();
   console.log("current token supply:", totalSupply.toNumber(), "tokens");
-  const baseURI = "ipfs://QmWRRiM8YvhCjQN4g9ooBqKXubAWuWD5NG9FuLHYnzoHPh/";
   const startBlockNumber = await provider.getBlockNumber();
   const startTime = Date.now();
   let previousBlockNumber = -1;
@@ -30,8 +29,7 @@ async function main() {
     try {
       const receivers = users.slice(BATCH_SIZE*adminId, BATCH_SIZE*(adminId+1)).map((user) => user.address);
       const tokenIds = slice.map((offset) => totalSupply.add(offset));
-      const tokenURIs = tokenIds.map((tokenId) => baseURI + tokenId);
-      const tx = await contract.connect(admins[adminId]).adminBatchMint(receivers, tokenIds, tokenURIs, { gasPrice: 0 });
+      const tx = await contract.connect(admins[adminId]).adminBatchMint(receivers, tokenIds, { gasPrice: 0 });
       const receipt = await tx.wait();
       if (receipt.blockNumber > previousBlockNumber) {
         console.log("\nBlockNumber:", receipt.blockNumber);
