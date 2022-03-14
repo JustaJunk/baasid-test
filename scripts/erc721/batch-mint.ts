@@ -29,11 +29,12 @@ async function main() {
     try {
       const receivers = users.slice(BATCH_SIZE*adminId, BATCH_SIZE*(adminId+1)).map((user) => user.address);
       const tokenIds = slice.map((offset) => totalSupply.add(offset));
-      const tx = await contract.connect(admins[adminId]).adminBatchMint(receivers, tokenIds, { gasPrice: 0 });
+      const tx = await contract.connect(admins[adminId]).adminBatchMint(receivers, tokenIds);
       const receipt = await tx.wait();
       if (receipt.blockNumber > previousBlockNumber) {
         console.log("\nBlockNumber:", receipt.blockNumber);
         console.log("BlockHash:", receipt.blockHash);
+        console.log("GasUsed:", receipt.cumulativeGasUsed.toNumber());
         previousBlockNumber = receipt.blockNumber;
       }
       // console.log("TxHash:", receipt.transactionHash); // print tx hash

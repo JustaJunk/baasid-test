@@ -56,14 +56,10 @@ contract ERC721Admin is ERC721Enumerable, AccessControl {
     /// @dev Admin batch mint
     function adminBatchMint(
         address[] calldata receivers,
-        uint256[] calldata tokenIds,
-        string[] calldata tokenURIs
+        uint256[] calldata tokenIds
     ) external {
         uint256 size = receivers.length;
-        require(
-            size == tokenIds.length && size == tokenURIs.length,
-            "size not match"
-        );
+        require(size == tokenIds.length, "size not match");
         for (uint256 i = 0; i < size; i++) {
             _safeMint(receivers[i], tokenIds[i]);
         }

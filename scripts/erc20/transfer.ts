@@ -24,14 +24,12 @@ async function main() {
       const tx = await contract.connect(users[userId]).transfer(
         users[(userId+1)%size].address,
         balance.div(2),
-        { 
-          gasPrice: 0
-        }  
       );
       const receipt = await tx.wait();
       if (receipt.blockNumber > previousBlockNumber) {
         console.log("\nBlockNumber:", receipt.blockNumber);
         console.log("BlockHash:", receipt.blockHash);
+        console.log("GasUsed:", receipt.cumulativeGasUsed.toNumber());
         previousBlockNumber = receipt.blockNumber;
       }
       // console.log("TxHash:", receipt.transactionHash); // print tx hash

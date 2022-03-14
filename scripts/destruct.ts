@@ -15,10 +15,10 @@ async function main() {
   // Destruct
   if (erc721Admin && erc20Mojo) {
     // Destruct
-    await erc721Admin.selfDestruct({ gasPrice: 0 });
-    await erc20Mojo.selfDestruct({ gasPrice: 0 });
+    await erc721Admin.selfDestruct();
+    await erc20Mojo.selfDestruct();
     /// @ts-ignore
-    fs.rmSync(artifactMap[chainId], { recursive: true });
+    fs.rmSync(artifactMap[chainId].slice(1), { recursive: true });
   }
 }
 
