@@ -14,8 +14,8 @@ async function main() {
   console.log("users count:", size, "\n");
 
   // Transfer tokens
-  const startTime = Date.now();
   const txHandler = new TxHandler();
+  txHandler.start();
   Promise.all(users.map(async (user, userId) => {
     const balance = await contract.balanceOf(user.address);
     return txHandler.handle(
@@ -27,19 +27,8 @@ async function main() {
       .catch((err) => {throw err})
     );
   }))
-  .then(() => {
-    const endTime = Date.now();
-    txHandler.showHistory();
-    txHandler.saveHistory(`./test-logs/erc20_transfer_${size}`);
-    const costSec = (endTime - startTime)/1000;
-    console.log("Time cost:", costSec, "sec");
-    console.log("Gas / sec:", Math.floor(txHandler.totalGasCost/costSec));
-    console.log("Tx  / sec:", Math.floor(size/costSec));
-  })
-  .catch((err) => {
-    throw err;
-  });
-
+  .then(() => txHandler.benchmark(`./test-logs/erc20_transfer_${txHandler.txCounter}`))
+  .catch((err) => {throw err});
 }
 
 main().catch((error) => {

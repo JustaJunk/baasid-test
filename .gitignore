@@ -10,4 +10,4 @@ cache
 artifacts
 
 # test logs
-./test-logs
+test-logs/

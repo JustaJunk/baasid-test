@@ -22,23 +22,20 @@ async function main() {
   const totalSupply = await contract.totalSupply();
   console.log("current token supply:", totalSupply.toNumber(), "tokens");
   const txHandler = new TxHandler();
-  const startTime = Date.now();
+  txHandler.start();
   Promise.all(offsetIdxSlices.map(async (slice, adminId) => {
       const tokenIds = slice.map((offset) => totalSupply.sub(offset+1));
       return txHandler.handle(
         await contract.connect(admins[adminId]).adminBatchBurn(tokenIds)
-        .then(tx => {return tx})
-        .catch(err => {throw err})
+        .then((tx) => {return tx})
+        .catch((err) => {throw err})
       );
   }))
   .then(async () => {
-    const endTime = Date.now();
     console.log("\ncurrent total supply:", (await contract.totalSupply()).toNumber(), "tokens\n");
-    txHandler.showHistory();
-    txHandler.saveHistory(`./test-logs/erc721_batch_burn_${offsetIdx.length}`);
-    console.log("Time cost:", (endTime - startTime)/1000, "sec");
+    txHandler.benchmark(`./test-logs/erc721_batch_burn_${offsetIdx.length}`);
   })
-  .catch(err => {return err});
+  .catch((err) => {return err});
 }
 
 main().catch((error) => {
