@@ -23,26 +23,25 @@ async function main() {
   const offsetIdxSlices = [...Array(BATCH_ADMIN_COUNT).keys()].map((adminId) => offsetIdx.slice(BATCH_SIZE*adminId, BATCH_SIZE*(adminId+1)));
   const totalSupply = await contract.totalSupply();
   console.log("current token supply:", totalSupply.toNumber(), "tokens");
-  const startBlockNumber = await provider.getBlockNumber();
   const txHandler = new TxHandler();
   const startTime = Date.now();
-  const status = await Promise.all(offsetIdxSlices.map(async (slice, adminId) => {
-    try {
+  Promise.all(offsetIdxSlices.map(async (slice, adminId) => {
       const receivers = users.slice(BATCH_SIZE*adminId, BATCH_SIZE*(adminId+1)).map((user) => user.address);
       const tokenIds = slice.map((offset) => totalSupply.add(offset));
-      return txHandler.handle(await contract.connect(admins[adminId]).adminBatchMint(receivers, tokenIds));
-    } catch (err: any) {
-      console.error("[ERROR]", adminId, err.message);
-    }
-  }));
-  const endTime = Date.now();
-  const invalidCount = status.filter((s) => s !== 1).length;
-  if (invalidCount == 0) {
+      return txHandler.handle(
+        await contract.connect(admins[adminId]).adminBatchMint(receivers, tokenIds)
+        .then(tx => {return tx})
+        .catch(err => {throw err})  
+      );
+  }))
+  .then(async () => {
     console.log("\ncurrent total supply:", (await contract.totalSupply()).toNumber(), "tokens\n");
+    const endTime = Date.now();
     txHandler.showHistory();
-    txHandler.saveHistory(`./test-history/erc721_batch_mint_${offsetIdx.length}`);
+    txHandler.saveHistory(`./test-logs/erc721_batch_mint_${offsetIdx.length}`);
     console.log("Time cost:", (endTime - startTime)/1000, "sec");
-  }
+  })
+  .catch(err => {throw err});
 }
 
 main().catch((error) => {

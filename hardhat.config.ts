@@ -63,7 +63,7 @@ const config: HardhatUserConfig = {
         mnemonic: "test test test test test test test test test test test junk",
         count: MAX_SIGNER_COUNT,
       },
-      chainId: 928558113,
+      chainId: 5079,
       gasPrice: 0,
     },
   },

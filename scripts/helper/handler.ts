@@ -3,18 +3,22 @@ import { writeFileSync } from "fs";
 
 type BlockInfo = {
   blockHash: string,
-  blockGasUsed: BigNumber,
+  blockGasUsed: number,
 }
 
 export class TxHandler {
   
   blockInfoMap: Map<number, BlockInfo>;
 
+  totalGasCost: number;
+
   constructor() {
     this.blockInfoMap = new Map<number, BlockInfo>();
+    this.totalGasCost = 0;
   }
 
-  async handle(tx: ContractTransaction): Promise<number | undefined> {
+  async handle(tx: ContractTransaction): Promise<void> {
+    if (!tx) return;
     const receipt = await tx.wait();
     if (!this.blockInfoMap.has(receipt.blockNumber)) {
       console.log(receipt.blockNumber);
@@ -22,7 +26,7 @@ export class TxHandler {
         receipt.blockNumber,
         {
           blockHash: receipt.blockHash,
-          blockGasUsed: receipt.cumulativeGasUsed,         
+          blockGasUsed: receipt.cumulativeGasUsed.toNumber(),         
         }
       );
     }
@@ -34,31 +38,29 @@ export class TxHandler {
           receipt.blockNumber,
           {
             blockHash: receipt.blockHash,
-            blockGasUsed: receipt.cumulativeGasUsed,         
+            blockGasUsed: receipt.cumulativeGasUsed.toNumber(),         
           }
         );
       }
     }
-    return receipt.status;
   }
 
   showHistory() {
-    let gasCost = 0;
     this.blockInfoMap.forEach((blockInfo, blockNumber) => {
       console.log("\nBlockNumber:", blockNumber);
       console.log("BlockHash:", blockInfo.blockHash);
-      const gasUsed = blockInfo.blockGasUsed.toNumber();
+      const gasUsed = blockInfo.blockGasUsed;
       console.log("GasUsed:", gasUsed);
-      gasCost += gasUsed;
+      this.totalGasCost += gasUsed;
     })
     console.log("\nBlock cost:", this.blockInfoMap.size);
-    console.log("Gas cost:", gasCost);
+    console.log("Gas cost:", this.totalGasCost);
   }
 
   saveHistory(filename: string) {
     writeFileSync(
       filename,
-      JSON.stringify(this.blockInfoMap, null, 4)
+      JSON.stringify(Object.fromEntries(this.blockInfoMap), null, 4)
     );
   }
 }

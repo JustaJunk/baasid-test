@@ -5,6 +5,9 @@ coverage.json
 typechain
 deployments/localhost
 
-#Hardhat files
+# Hardhat files
 cache
 artifacts
+
+# test logs
+./test-logs

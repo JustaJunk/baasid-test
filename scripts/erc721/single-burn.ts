@@ -22,22 +22,22 @@ async function main() {
   console.log("current token supply:", totalSupply.toNumber(), "tokens");
   const txHandler = new TxHandler();
   const startTime = Date.now();
-  const status = await Promise.all(offsetIdx.map(async (idx) => {
-    try {
+  Promise.all(offsetIdx.map(async (idx) => {
       const tokenId = totalSupply.sub(idx+1);
-      return txHandler.handle(await contract.connect(admins[idx]).adminBurn(tokenId));
-    } catch (err: any) {
-      console.error("[ERROR]", idx, err.message);
-    }
-  }));
-  const endTime = Date.now();
-  const invalidCount = status.filter((s) => s !== 1).length;
-  if (invalidCount == 0) {
+      return txHandler.handle(
+        await contract.connect(admins[idx]).adminBurn(tokenId)
+        .then(tx => {return tx})
+        .catch(err => {throw err})
+      );
+  }))
+  .then(async () => {
     console.log("\ncurrent total supply:", (await contract.totalSupply()).toNumber(), "tokens\n");
+    const endTime = Date.now();
     txHandler.showHistory();
-    txHandler.saveHistory(`./test-history/erc721_singe_burn_${offsetIdx.length}`);
+    txHandler.saveHistory(`./test-logs/erc721_singe_burn_${offsetIdx.length}`);
     console.log("Time cost:", (endTime - startTime)/1000, "sec");
-  }
+  })
+  .catch(err => {throw err});
 }
 
 main().catch((error) => {
