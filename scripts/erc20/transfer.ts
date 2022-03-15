@@ -1,7 +1,6 @@
 import { ethers } from "hardhat";
 import { getERC20Mojo } from "../../misc/contract-hooks";
-
-const { provider } = ethers;
+import { TxHandler } from "../helper/handler";
 
 async function main() {
 
@@ -12,35 +11,30 @@ async function main() {
   // Get users
   const users = await ethers.getSigners();
   const size = users.length;
-  console.log("users count:", size);
+  console.log("users count:", size, "\n");
 
   // Transfer tokens
-  const startBlockNumber = await provider.getBlockNumber();
   const startTime = Date.now();
-  let previousBlockNumber = -1;
-  await Promise.all(users.map(async (user, userId) => {
+  const txHandler = new TxHandler();
+  const status = await Promise.all(users.map(async (user, userId) => {
     try {
       const balance = await contract.balanceOf(user.address);
-      const tx = await contract.connect(users[userId]).transfer(
-        users[(userId+1)%size].address,
-        balance.div(2),
-      );
-      const receipt = await tx.wait();
-      if (receipt.blockNumber > previousBlockNumber) {
-        console.log("\nBlockNumber:", receipt.blockNumber);
-        console.log("BlockHash:", receipt.blockHash);
-        console.log("GasUsed:", receipt.cumulativeGasUsed.toNumber());
-        previousBlockNumber = receipt.blockNumber;
-      }
-      // console.log("TxHash:", receipt.transactionHash); // print tx hash
+      return txHandler.handle(
+        await contract.connect(users[userId]).transfer(
+          users[(userId*7)%size].address,
+          balance.div(2),
+      ));
     } catch (err: any) {
       console.error("[ERROR]", userId, err.message);
     }
   }));
-  const endBlockNumber = await provider.getBlockNumber();
   const endTime = Date.now();
-  console.log("\nBlock cost:", endBlockNumber - startBlockNumber);
-  console.log("Time cost:", (endTime - startTime)/1000, "sec");
+  const invalidCount = status.filter((s) => s !== 1).length;
+  if (invalidCount == 0) {
+    txHandler.showHistory();
+    txHandler.saveHistory(`./test-history/erc20_transfer_${size}`);
+    console.log("Time cost:", (endTime - startTime)/1000, "sec");
+  }
 }
 
 main().catch((error) => {

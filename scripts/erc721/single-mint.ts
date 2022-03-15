@@ -1,6 +1,7 @@
 import { ethers } from "hardhat";
 import { getERC721Admin } from "../../misc/contract-hooks";
 import { MAX_ADMIN_COUNT } from "../../misc/constants";
+import { TxHandler } from "../helper/handler";
 
 const { provider } = ethers;
 
@@ -20,30 +21,24 @@ async function main() {
   const offsetIdx = [...Array(MAX_ADMIN_COUNT).keys()];
   const totalSupply = await contract.totalSupply();
   console.log("current token supply:", totalSupply.toNumber(), "tokens");
-  const startBlockNumber = await provider.getBlockNumber();
+  const txHandler = new TxHandler();
   const startTime = Date.now();
-  let previousBlockNumber = 0;
-  await Promise.all(offsetIdx.map(async (idx) => {
+  const status = await Promise.all(offsetIdx.map(async (idx) => {
     try {
       const tokenId = totalSupply.add(idx);
-      const tx = await contract.connect(admins[idx]).adminMint(user.address, tokenId);
-      const receipt = await tx.wait();
-      if (receipt.blockNumber > previousBlockNumber) {
-        console.log("\nBlockNumber:", receipt.blockNumber);
-        console.log("BlockHash:", receipt.blockHash);
-        console.log("GasUsed:", receipt.cumulativeGasUsed.toNumber());
-        previousBlockNumber = receipt.blockNumber;
-      }
-      // console.log("TxHash:", receipt.transactionHash); // print tx hash
+      return txHandler.handle(await contract.connect(admins[idx]).adminMint(user.address, tokenId));
     } catch (err: any) {
       console.error("[ERROR]", idx, err.message);
     }
   }));
-  const endBlockNumber = await provider.getBlockNumber();
   const endTime = Date.now();
-  console.log("\ncurrent total supply:", (await contract.totalSupply()).toNumber(), "tokens\n");
-  console.log("Block cost:", endBlockNumber - startBlockNumber);
-  console.log("Time cost:", (endTime - startTime)/1000, "sec");
+  const invalidCount = status.filter((s) => s !== 1).length;
+  if (invalidCount == 0) {
+    console.log("\ncurrent total supply:", (await contract.totalSupply()).toNumber(), "tokens\n");
+    txHandler.showHistory();
+    txHandler.saveHistory(`./test-history/erc721_singe_mint_${offsetIdx.length}`);
+    console.log("Time cost:", (endTime - startTime)/1000, "sec");
+  }
 }
 
 main().catch((error) => {
