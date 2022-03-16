@@ -47,7 +47,7 @@ const config: HardhatUserConfig = {
       chainId: 1337,
     },
     baasid: {
-      url: "http://192.168.2.183:8545",
+      url: "http://192.168.2.182:8545",
       accounts: {
         // mnemonic: process.env.MNEMONI,
         mnemonic: "test test test test test test test test test test test junk",
@@ -57,7 +57,7 @@ const config: HardhatUserConfig = {
       gasPrice: 0,
     },
     baasid_120: {
-      url: "http://192.168.2.124:8545",
+      url: "http://192.168.2.121:8545",
       accounts: {
         // mnemonic: process.env.MNEMONI,
         mnemonic: "test test test test test test test test test test test junk",

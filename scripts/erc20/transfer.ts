@@ -1,6 +1,7 @@
+import { BigNumber } from "ethers";
 import { ethers } from "hardhat";
 import { getERC20Mojo } from "../../misc/contract-hooks";
-import { TxHandler } from "../helper/handler";
+import { TxHandler, delay } from "../helper/handler";
 
 async function main() {
 
@@ -11,24 +12,22 @@ async function main() {
   // Get users
   const users = await ethers.getSigners();
   const size = users.length;
-  const { provider } = users[0];
   console.log("users count:", size, "\n");
 
   // Transfer tokens
   const txHandler = new TxHandler();
-  txHandler.start();
   Promise.all(users.map(async (user, userId) => {
-    const balance = await contract.balanceOf(user.address);
+    await delay(userId*5);
+    const balance = await contract.balanceOf(user.address).catch(() => BigNumber.from(0));
     return txHandler.handle(
       await contract.connect(users[userId]).transfer(
         users[(userId*7+1)%size].address,
         balance.div(2),
       )
-      .then((tx) => {return tx})
-      .catch((err) => {throw err})
+      .catch(() => undefined)
     );
   }))
-  .then(() => txHandler.benchmark(`erc20_transfer_${txHandler.txCounter}`))
+  .then(() => txHandler.benchmark(`erc20_transfer_${txHandler.totalTxCount}`))
   .catch((err) => {throw err});
 }
 

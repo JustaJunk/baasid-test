@@ -5,8 +5,11 @@ import { existsSync, mkdirSync, writeFileSync } from "fs";
 const LOG_PATH = './test-logs';
 
 type BlockInfo = {
+  blockNumber: number,
   blockHash: string,
+  blockTxCount: number,
   blockGasUsed: number,
+  blockEndTime: number,
 }
 
 type BenchmarkReport = {
@@ -17,7 +20,7 @@ type BenchmarkReport = {
   TPS: number,
   GPS: number,
   SPB: number,
-  blockInfos: {[k: string]: BlockInfo},
+  blockInfos: BlockInfo[],
 }
 
 export async function makeReportPath(filename: string) {
@@ -25,70 +28,79 @@ export async function makeReportPath(filename: string) {
   const { chainId } = await ethers.provider.getNetwork();
   const folder = `${LOG_PATH}/${chainId}`;
   if (!existsSync(folder)) mkdirSync(folder);
-  return `${folder}/${filename}`;
+  return `${folder}/${filename}.json`;
 }
 
 export class TxHandler {
   
   blockInfoMap: Map<number, BlockInfo>;
 
-  totalGas: number;
-
-  timer: number;
-
-  txCounter: number;
+  totalTxCount: number;
 
   constructor() {
     this.blockInfoMap = new Map<number, BlockInfo>();
-    this.totalGas = 0;
-    this.timer = 0;
-    this.txCounter = 0;
+    this.totalTxCount = 0;
   }
 
-  start() {
-    this.timer = Date.now();
-  }
-
-  async handle(tx: ContractTransaction): Promise<void> {
-    ++this.txCounter;
+  async handle(tx: ContractTransaction | undefined): Promise<void> {
+    if (!tx) return;
+    ++this.totalTxCount;
     const receipt = await tx.wait();
     if (!this.blockInfoMap.has(receipt.blockNumber)) {
       console.log(receipt.blockNumber);
       this.blockInfoMap.set(
         receipt.blockNumber,
         {
+          blockNumber: receipt.blockNumber,
           blockHash: receipt.blockHash,
+          blockTxCount: 1,
           blockGasUsed: receipt.cumulativeGasUsed.toNumber(),
+          blockEndTime: Date.now(),
         }
       );
     }
     else {
       const previousBlockInfo = this.blockInfoMap.get(receipt.blockNumber);
       if (!previousBlockInfo) return;
-      if (receipt.cumulativeGasUsed.gt(previousBlockInfo.blockGasUsed)) {
-        this.blockInfoMap.set(
-          receipt.blockNumber,
-          {
-            blockHash: receipt.blockHash,
-            blockGasUsed: receipt.cumulativeGasUsed.toNumber(),
-          }
-        );
-      }
+      const newBlockCount = previousBlockInfo.blockTxCount + 1;
+      const newGasUsed = 
+        receipt.cumulativeGasUsed.gt(previousBlockInfo.blockGasUsed)?
+        receipt.cumulativeGasUsed.toNumber():
+        previousBlockInfo.blockGasUsed;
+      this.blockInfoMap.set(
+        receipt.blockNumber,
+        {
+          blockNumber: receipt.blockNumber,
+          blockHash: receipt.blockHash,
+          blockTxCount: newBlockCount,
+          blockGasUsed: newGasUsed,
+          blockEndTime: previousBlockInfo.blockEndTime,
+        }
+      );
     }
   }
 
   async benchmark(filename: string | undefined) {
-    const timeConsumed = (Date.now() - this.timer)/1000;
-    this.blockInfoMap.forEach((blockInfo, blockNumber) => {
-      console.log("\nBlockNumber:", blockNumber);
+    const blockInfos = [...this.blockInfoMap.values()];
+    const validBlockInfos = blockInfos.slice(1, -1);
+    const validBlockCount = validBlockInfos.length;
+    if (validBlockCount < 2) return;
+    const timeConsumed = (validBlockInfos[validBlockCount-1].blockEndTime - blockInfos[0].blockEndTime)/1000;
+    let totalTxCount = 0;
+    let totalGas = 0;
+    validBlockInfos.map((blockInfo) => {
+      console.log("\nBlockNumber:", blockInfo.blockNumber);
       console.log("BlockHash:", blockInfo.blockHash);
       const gasUsed = blockInfo.blockGasUsed;
+      const txCount = blockInfo.blockTxCount;
+      console.log("TxCount:", txCount);
       console.log("GasUsed:", gasUsed);
-      this.totalGas += gasUsed;
+      totalTxCount += txCount;
+      totalGas += gasUsed;
     });
-    const txCount = this.txCounter;
-    const gasConsumed = this.totalGas;
-    const blockConsumed = this.blockInfoMap.size;
+    const txCount = totalTxCount;
+    const gasConsumed = totalGas;
+    const blockConsumed = validBlockCount;
     const TPS = parseFloat((txCount/timeConsumed).toFixed(2));
     const GPS = parseFloat((gasConsumed/timeConsumed).toFixed(2));
     const SPB = parseFloat((timeConsumed/blockConsumed).toFixed(2));
@@ -108,7 +120,7 @@ export class TxHandler {
       TPS,
       GPS,
       SPB,
-      blockInfos: Object.fromEntries(this.blockInfoMap),
+      blockInfos,
     }
     
     if (filename) {
@@ -119,4 +131,8 @@ export class TxHandler {
       );
     }
   }
+}
+
+export function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

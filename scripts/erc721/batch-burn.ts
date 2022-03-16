@@ -3,8 +3,6 @@ import { getERC721Admin } from "../../misc/contract-hooks";
 import { BATCH_ADMIN_COUNT, BATCH_SIZE } from "../../misc/constants";
 import { TxHandler } from "../helper/handler";
 
-const { provider } = ethers;
-
 async function main() {
   
   // Get ERC721Admin contract  
@@ -22,20 +20,18 @@ async function main() {
   const totalSupply = await contract.totalSupply();
   console.log("current token supply:", totalSupply.toNumber(), "tokens");
   const txHandler = new TxHandler();
-  txHandler.start();
   Promise.all(offsetIdxSlices.map(async (slice, adminId) => {
       const tokenIds = slice.map((offset) => totalSupply.sub(offset+1));
       return txHandler.handle(
         await contract.connect(admins[adminId]).adminBatchBurn(tokenIds)
-        .then((tx) => {return tx})
-        .catch((err) => {throw err})
+        .catch(() => undefined)
       );
   }))
   .then(async () => {
     console.log("\ncurrent total supply:", (await contract.totalSupply()).toNumber(), "tokens\n");
     txHandler.benchmark(`erc721_batch_burn_${offsetIdx.length}`);
   })
-  .catch((err) => {return err});
+  .catch((err) => {throw err});
 }
 
 main().catch((error) => {
