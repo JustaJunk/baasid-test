@@ -1,5 +1,8 @@
 import { ContractTransaction } from "ethers";
-import { writeFileSync } from "fs";
+import { ethers } from "hardhat";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
+
+const LOG_PATH = './test-logs';
 
 type BlockInfo = {
   blockHash: string,
@@ -7,7 +10,6 @@ type BlockInfo = {
 }
 
 type BenchmarkReport = {
-  blockInfos: any,
   txCount: number,
   blockConsumed: number,
   gasConsumed: number,
@@ -15,6 +17,15 @@ type BenchmarkReport = {
   TPS: number,
   GPS: number,
   SPB: number,
+  blockInfos: {[k: string]: BlockInfo},
+}
+
+export async function makeReportPath(filename: string) {
+  if (!existsSync(LOG_PATH)) mkdirSync(LOG_PATH);
+  const { chainId } = await ethers.provider.getNetwork();
+  const folder = `${LOG_PATH}/${chainId}`;
+  if (!existsSync(folder)) mkdirSync(folder);
+  return `${folder}/${filename}`;
 }
 
 export class TxHandler {
@@ -47,7 +58,7 @@ export class TxHandler {
         receipt.blockNumber,
         {
           blockHash: receipt.blockHash,
-          blockGasUsed: receipt.cumulativeGasUsed.toNumber(),         
+          blockGasUsed: receipt.cumulativeGasUsed.toNumber(),
         }
       );
     }
@@ -59,14 +70,14 @@ export class TxHandler {
           receipt.blockNumber,
           {
             blockHash: receipt.blockHash,
-            blockGasUsed: receipt.cumulativeGasUsed.toNumber(),         
+            blockGasUsed: receipt.cumulativeGasUsed.toNumber(),
           }
         );
       }
     }
   }
 
-  benchmark(filename: string | undefined) {
+  async benchmark(filename: string | undefined) {
     const timeConsumed = (Date.now() - this.timer)/1000;
     this.blockInfoMap.forEach((blockInfo, blockNumber) => {
       console.log("\nBlockNumber:", blockNumber);
@@ -84,12 +95,12 @@ export class TxHandler {
     console.log("\nTx count :", txCount);
     console.log("Gas consumed:", gasConsumed);
     console.log("Block consumed:", blockConsumed);
+    console.log("Time consumed:", timeConsumed);
     console.log("TPS:", TPS);
     console.log("GPS:", GPS);
     console.log("SPB:", SPB);
 
-    const report = {
-      blockInfos: Object.fromEntries(this.blockInfoMap),
+    const report: BenchmarkReport = {
       txCount,
       blockConsumed,
       gasConsumed,
@@ -97,11 +108,13 @@ export class TxHandler {
       TPS,
       GPS,
       SPB,
+      blockInfos: Object.fromEntries(this.blockInfoMap),
     }
     
     if (filename) {
+      const filePath = await makeReportPath(filename);
       writeFileSync(
-        filename,
+        filePath,
         JSON.stringify(report, null, 4)
       );
     }

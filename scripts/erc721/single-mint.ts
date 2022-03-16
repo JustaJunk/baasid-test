@@ -33,7 +33,7 @@ async function main() {
   }))
   .then(async () => {
     console.log("\ncurrent total supply:", (await contract.totalSupply()).toNumber(), "tokens\n");
-    txHandler.benchmark(`./test-logs/erc721_singe_mint_${offsetIdx.length}`);
+    txHandler.benchmark(`erc721_singe_mint_${offsetIdx.length}`);
   })
   .catch((err) => {throw err})
   ;

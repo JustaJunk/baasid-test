@@ -11,6 +11,7 @@ async function main() {
   // Get users
   const users = await ethers.getSigners();
   const size = users.length;
+  const { provider } = users[0];
   console.log("users count:", size, "\n");
 
   // Transfer tokens
@@ -27,7 +28,7 @@ async function main() {
       .catch((err) => {throw err})
     );
   }))
-  .then(() => txHandler.benchmark(`./test-logs/erc20_transfer_${txHandler.txCounter}`))
+  .then(() => txHandler.benchmark(`erc20_transfer_${txHandler.txCounter}`))
   .catch((err) => {throw err});
 }
 
