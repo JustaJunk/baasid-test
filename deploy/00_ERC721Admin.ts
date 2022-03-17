@@ -5,7 +5,6 @@ import { MAX_ADMIN_COUNT, BASE_URI } from "../misc/constants";
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deploy } = hre.deployments;
   const admins = await hre.getUnnamedAccounts();
-  console.log("Deployer:", admins[0]);
   await deploy("ERC721Admin", {
     args: [admins.slice(0, MAX_ADMIN_COUNT), BASE_URI],
     from: admins[0],

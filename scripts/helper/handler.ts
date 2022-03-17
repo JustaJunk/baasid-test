@@ -84,7 +84,10 @@ export class TxHandler {
     const blockInfos = [...this.blockInfoMap.values()];
     const validBlockInfos = blockInfos.slice(1, -1);
     const validBlockCount = validBlockInfos.length;
-    if (validBlockCount < 2) return;
+    if (validBlockCount == 0) {
+      console.error("\n[ERROR] not valid block\n");
+      return;
+    }
     const timeConsumed = (validBlockInfos[validBlockCount-1].blockEndTime - blockInfos[0].blockEndTime)/1000;
     let totalTxCount = 0;
     let totalGas = 0;
@@ -130,6 +133,8 @@ export class TxHandler {
         JSON.stringify(report, null, 4)
       );
     }
+
+    console.log('\n');
   }
 }
 

@@ -85,6 +85,32 @@ contract ERC721Admin is ERC721Enumerable, AccessControl {
         }
     }
 
+    /// @notice Token of owner by page and amount (ex: (1, 10) will return first page of 10 token IDs)
+    function tokenOfOwnerByPage(
+        address owner,
+        uint256 pageIndex,
+        uint256 amountPerPage
+    ) external view returns (uint256[] memory tokenIdList) {
+        uint256 endIdx = pageIndex * amountPerPage;
+        if (endIdx == 0) {
+            delete tokenIdList;
+        } else {
+            uint256 startIdx = endIdx - amountPerPage;
+            if (endIdx > balanceOf(owner)) {
+                endIdx = balanceOf(owner);
+            }
+            if (endIdx <= startIdx) {
+                delete tokenIdList;
+            } else {
+                uint256 returnAmount = endIdx - startIdx;
+                tokenIdList = new uint256[](returnAmount);
+                for (uint256 i = 0; i < returnAmount; ++i) {
+                    tokenIdList[i] = tokenOfOwnerByIndex(owner, startIdx + i);
+                }
+            }
+        }
+    }
+
     /// @dev Self-destruct
     function selfDestruct() external onlyRole(DEFAULT_ADMIN_ROLE) {
         selfdestruct(payable(defaultAdmin));

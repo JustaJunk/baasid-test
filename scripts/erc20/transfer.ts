@@ -17,7 +17,7 @@ async function main() {
   // Transfer tokens
   const txHandler = new TxHandler();
   Promise.all(users.map(async (user, userId) => {
-    await delay(userId*5);
+    // await delay(userId*20);
     const balance = await contract.balanceOf(user.address).catch(() => BigNumber.from(0));
     return txHandler.handle(
       await contract.connect(users[userId]).transfer(
