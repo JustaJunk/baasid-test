@@ -36,3 +36,18 @@ Destruct the contract and deploy again
 yarn runs scripts/destruct.ts --network baasid
 yarn deploy --network baasid
 ```
+
+## Special function
+#### tokenOfOwnerByPage
+```
+參數
+1. owner: 要訪問的錢包地址
+2. pageIndex: 頁面編號，從1開始
+3. amountPerPage: 一頁顯示的token數量，建議不超過50
+回傳
+tokenIdList: tokenId 的陣列
+
+P.S.
+pageIndex或amountPerPage為零會回傳[]
+訪問範圍超過owner的持有數也會回傳[]
+```
