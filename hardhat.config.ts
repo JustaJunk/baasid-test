@@ -57,7 +57,7 @@ const config: HardhatUserConfig = {
       gasPrice: 0,
     },
     baasid_120: {
-      url: "http://192.168.2.123:8545",
+      url: "http://192.168.2.122:8545",
       accounts: {
         // mnemonic: process.env.MNEMONI,
         mnemonic: "test test test test test test test test test test test junk",

@@ -85,7 +85,7 @@ export class TxHandler {
     const validBlockInfos = blockInfos.slice(1, -1);
     const validBlockCount = validBlockInfos.length;
     if (validBlockCount == 0) {
-      console.error("\n[ERROR] not valid block\n");
+      console.error("\n[ERROR] not enough valid block\n");
       return;
     }
     const timeConsumed = (validBlockInfos[validBlockCount-1].blockEndTime - blockInfos[0].blockEndTime)/1000;
